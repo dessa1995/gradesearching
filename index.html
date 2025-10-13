@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생 성적 확인 프로그램</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .card-enter {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+        .card-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .screen-transition {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+        .screen-hide {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            position: absolute;
+        }
+        .screen-show {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md mx-auto">
+        <!-- 메인 화면: 학생 이름 입력 -->
+        <div id="main-screen" class="screen-transition screen-show">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
+                <h1 class="text-2xl font-bold mb-2">학생 성적 확인</h1>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">학생의 이름을 입력하여 성적을 확인하세요.</p>
+                <form id="search-form">
+                    <input type="text" id="student-name-input" placeholder="이름을 입력하세요" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-lg text-center text-lg outline-none transition duration-300">
+                    <button type="submit" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 shadow-md">
+                        결과 확인
+                    </button>
+                </form>
+                <p id="error-message" class="text-red-500 mt-4 h-5"></p>
+            </div>
+        </div>
+
+        <!-- 결과 화면: 학생 정보 표시 -->
+        <div id="results-screen" class="screen-transition screen-hide w-full max-w-md">
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
+                <h2 class="text-2xl font-bold mb-4"><span id="result-name" class="text-indigo-500 dark:text-indigo-400"></span> 학생 결과</h2>
+                <div class="space-y-4 mt-8">
+                    <!-- 점수 카드 -->
+                    <div class="card-enter bg-gray-100 dark:bg-gray-700 p-5 rounded-lg flex justify-between items-center">
+                        <span class="font-semibold text-lg">총점</span>
+                        <span id="result-score" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400"></span>
+                    </div>
+                    <!-- 등급 카드 -->
+                    <div class="card-enter bg-gray-100 dark:bg-gray-700 p-5 rounded-lg flex justify-between items-center" style="transition-delay: 0.1s;">
+                        <span class="font-semibold text-lg">등급</span>
+                        <span id="result-grade" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400"></span>
+                    </div>
+                    <!-- 등수 카드 -->
+                    <div class="card-enter bg-gray-100 dark:bg-gray-700 p-5 rounded-lg flex justify-between items-center" style="transition-delay: 0.2s;">
+                        <span class="font-semibold text-lg">석차</span>
+                        <span id="result-rank" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400"></span>
+                    </div>
+                </div>
+                <button id="back-to-main" class="w-full mt-8 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 shadow-md">
+                    처음으로
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 제공된 CSV 데이터를 변수에 저장합니다.
+        const csvData = `성명,중간고사,수행평가,중간_환산,수행_환산,총점(60점만점),석차,등급
+강석민,0,0,0,0,57.74,1,1
+전재원,0,0,0,0,57.48,2,1
+장해밀,0,0,0,0,56.00,3,2
+이동민,0,0,0,0,54.81,4,2
+유현우,0,0,0,0,54.78,5,2
+권구현,0,0,0,0,54.74,6,3
+이가은,0,0,0,0,54.59,7,3
+김혁준,0,0,0,0,52.90,8,3
+박재윤,0,0,0,0,52.29,9,3
+구나예,0,0,0,0,52.19,10,3
+조성은,0,0,0,0,52.04,11,3
+박은찬,0,0,0,0,50.90,12,4
+전예영,0,0,0,0,50.62,13,4
+노건우,0,0,0,0,50.56,14,4
+이규섭,0,0,0,0,49.83,15,4
+박희연,0,0,0,0,49.00,16,4
+김나희,0,0,0,0,46.97,17,4
+이우진,0,0,0,0,44.39,18,4
+윤지유,0,0,0,0,42.65,19,4
+김성은,0,0,0,0,41.32,20,4
+황주한,0,0,0,0,40.42,21,5
+윤지현,0,0,0,0,35.17,22,5
+이현우,0,0,0,0,33.13,23,5
+맹지현,0,0,0,0,33.04,24,5
+성윤아,0,0,0,0,31.17,25,5
+최유담,0,0,0,0,29.16,26,5
+이지은,0,0,0,0,28.33,27,5
+박준혁,0,0,0,0,28.19,28,5
+최연호,0,0,0,0,27.94,29,5
+최다은,0,0,0,0,26.44,30,5
+이예은,0,0,0,0,25.48,31,6
+유소연,0,0,0,0,25.00,32,6
+우예림,0,0,0,0,22.96,33,6
+김재윤,0,0,0,0,22.13,34,6
+허경수,0,0,0,0,21.48,35,6
+박하랑,0,0,0,0,21.26,36,6
+박시원,0,0,0,0,20.59,37,6
+공재준,0,0,0,0,19.19,38,6
+박세아,0,0,0,0,18.97,39,7
+정희성,0,0,0,0,18.12,40,7
+이주성,0,0,0,0,17.59,41,7
+김채연,0,0,0,0,17.45,42,7
+정유찬,0,0,0,0,16.71,43,7
+박예은,0,0,0,0,16.48,44,7
+최인성,0,0,0,0,16.48,45,8
+정희진,0,0,0,0,15.10,46,8
+김가형,0,0,0,0,13.87,47,8
+이준민,0,0,0,0,13.75,48,8
+이연우,0,0,0,0,12.68,49,9`;
+
+        // CSV 데이터를 파싱하여 객체 배열로 변환하는 함수
+        function parseCSV(data) {
+            const lines = data.trim().split('\n');
+            const headers = lines[0].split(',');
+            const result = [];
+            for (let i = 1; i < lines.length; i++) {
+                const obj = {};
+                const currentline = lines[i].split(',');
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = currentline[j];
+                }
+                result.push(obj);
+            }
+            return result;
+        }
+
+        const studentData = parseCSV(csvData);
+
+        // DOM 요소 가져오기
+        const mainScreen = document.getElementById('main-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const searchForm = document.getElementById('search-form');
+        const nameInput = document.getElementById('student-name-input');
+        const errorMessage = document.getElementById('error-message');
+        const backButton = document.getElementById('back-to-main');
+        
+        const resultName = document.getElementById('result-name');
+        const resultScore = document.getElementById('result-score');
+        const resultGrade = document.getElementById('result-grade');
+        const resultRank = document.getElementById('result-rank');
+
+        // 검색 폼 제출 이벤트 처리
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const studentName = nameInput.value.trim();
+            if (!studentName) {
+                showError('이름을 입력해주세요.');
+                return;
+            }
+
+            const foundStudent = studentData.find(student => student.성명 === studentName);
+
+            if (foundStudent) {
+                displayResults(foundStudent);
+                switchToResultsScreen();
+            } else {
+                showError('해당 학생을 찾을 수 없습니다.');
+            }
+        });
+
+        // '처음으로' 버튼 클릭 이벤트 처리
+        backButton.addEventListener('click', () => {
+            switchToMainScreen();
+        });
+
+        // 에러 메시지 표시 함수
+        function showError(message) {
+            errorMessage.textContent = message;
+            setTimeout(() => {
+                errorMessage.textContent = '';
+            }, 3000);
+        }
+
+        // 결과 표시 함수
+        function displayResults(student) {
+            resultName.textContent = student.성명;
+            resultScore.textContent = `${student['총점(60점만점)']}점`;
+            resultGrade.textContent = `${student.등급}등급`;
+            resultRank.textContent = `${student.석차}등`;
+        }
+
+        // 결과 화면으로 전환하는 함수
+        function switchToResultsScreen() {
+            mainScreen.classList.remove('screen-show');
+            mainScreen.classList.add('screen-hide');
+            
+            setTimeout(() => {
+                resultsScreen.classList.remove('screen-hide');
+                resultsScreen.classList.add('screen-show');
+
+                // 카드 애니메이션 적용
+                const cards = resultsScreen.querySelectorAll('.card-enter');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('card-enter-active');
+                    }, 100 * index);
+                });
+            }, 400);
+        }
+
+        // 메인 화면으로 전환하는 함수
+        function switchToMainScreen() {
+            resultsScreen.classList.remove('screen-show');
+            resultsScreen.classList.add('screen-hide');
+            
+            // 카드 애니메이션 초기화
+            const cards = resultsScreen.querySelectorAll('.card-enter');
+            cards.forEach(card => card.classList.remove('card-enter-active'));
+
+            setTimeout(() => {
+                mainScreen.classList.remove('screen-hide');
+                mainScreen.classList.add('screen-show');
+                nameInput.value = ''; // 입력 필드 초기화
+            }, 400);
+        }
+    </script>
+</body>
+</html>
+
+
