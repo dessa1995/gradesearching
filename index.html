@@ -3,245 +3,544 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>학생 성적 확인 프로그램</title>
+    <title>2025 정치와 법 성적 분석</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;800&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
         }
-        .card-enter {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .card-enter-active {
-            opacity: 1;
-            transform: translateY(0);
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out;
         }
-        .screen-transition {
-            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .screen-hide {
-            opacity: 0;
-            transform: scale(0.95);
-            pointer-events: none;
-            position: absolute;
-        }
-        .screen-show {
-            opacity: 1;
-            transform: scale(1);
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-md mx-auto">
-        <!-- 메인 화면: 학생 이름 입력 -->
-        <div id="main-screen" class="screen-transition screen-show">
-            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
-                <h1 class="text-2xl font-bold mb-2">학생 성적 확인</h1>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">학생의 이름을 입력하여 성적을 확인하세요.</p>
-                <form id="search-form">
-                    <input type="text" id="student-name-input" placeholder="이름을 입력하세요" class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-transparent focus:border-indigo-500 dark:focus:border-indigo-400 rounded-lg text-center text-lg outline-none transition duration-300">
-                    <button type="submit" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 shadow-md">
-                        결과 확인
-                    </button>
-                </form>
-                <p id="error-message" class="text-red-500 mt-4 h-5"></p>
-            </div>
-        </div>
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen text-gray-800">
 
-        <!-- 결과 화면: 학생 정보 표시 -->
-        <div id="results-screen" class="screen-transition screen-hide w-full max-w-md">
-            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg text-center">
-                <h2 class="text-2xl font-bold mb-4"><span id="result-name" class="text-indigo-500 dark:text-indigo-400"></span> 학생 결과</h2>
-                <div class="space-y-4 mt-8">
-                    <!-- 점수 카드 -->
-                    <div class="card-enter bg-gray-100 dark:bg-gray-700 p-5 rounded-lg flex justify-between items-center">
-                        <span class="font-semibold text-lg">총점</span>
-                        <span id="result-score" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400"></span>
-                    </div>
-                    <!-- 등급 카드 -->
-                    <div class="card-enter bg-gray-100 dark:bg-gray-700 p-5 rounded-lg flex justify-between items-center" style="transition-delay: 0.1s;">
-                        <span class="font-semibold text-lg">등급</span>
-                        <span id="result-grade" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400"></span>
-                    </div>
-                    <!-- 등수 카드 -->
-                    <div class="card-enter bg-gray-100 dark:bg-gray-700 p-5 rounded-lg flex justify-between items-center" style="transition-delay: 0.2s;">
-                        <span class="font-semibold text-lg">석차</span>
-                        <span id="result-rank" class="text-2xl font-bold text-indigo-600 dark:text-indigo-400"></span>
-                    </div>
+    <div class="container mx-auto px-4 py-8 min-h-screen flex flex-col items-center justify-center" id="mainContainer">
+        
+        <!-- MAIN SEARCH SCREEN -->
+        <div id="searchScreen" class="w-full max-w-3xl text-center space-y-8 animate-fade-in">
+            <div class="mb-12">
+                <span class="inline-block px-4 py-2 rounded-full bg-white shadow-sm text-indigo-600 font-bold text-sm mb-4 tracking-wide">2025학년도 2학기</span>
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-4 text-gray-900 tracking-tight">정치와 법<br><span class="gradient-text">성적 리포트</span></h1>
+                <p class="text-xl text-gray-500 font-medium">학번 또는 이름을 입력하여 결과를 확인하세요.</p>
+            </div>
+
+            <div class="relative max-w-xl mx-auto group z-10">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+                <div class="relative flex bg-white rounded-2xl shadow-xl p-2">
+                    <input type="text" id="searchInput" 
+                        class="w-full pl-6 pr-4 py-4 text-xl font-bold bg-transparent outline-none text-gray-700 placeholder-gray-300"
+                        placeholder="예: 20103 또는 홍길동"
+                        onkeyup="if(event.key === 'Enter') handleSearch()">
+                    <button onclick="handleSearch()" 
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8 py-3 font-bold text-lg transition shadow-lg transform active:scale-95">
+                        조회
+                    </button>
                 </div>
-                <button id="back-to-main" class="w-full mt-8 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 shadow-md">
-                    처음으로
+            </div>
+            
+            <div class="pt-8 flex justify-center gap-6">
+                <button onclick="showFullList()" class="text-gray-500 hover:text-indigo-600 font-medium flex items-center gap-2 transition px-4 py-2 rounded-lg hover:bg-white hover:shadow-sm">
+                    <i class="fas fa-list"></i> 전체 리스트 보기
+                </button>
+                <button onclick="showStats()" class="text-gray-500 hover:text-purple-600 font-medium flex items-center gap-2 transition px-4 py-2 rounded-lg hover:bg-white hover:shadow-sm">
+                    <i class="fas fa-chart-pie"></i> 통계 분석 보기
                 </button>
             </div>
         </div>
+
+        <!-- DETAIL REPORT SCREEN (Hidden by default) -->
+        <div id="detailScreen" class="hidden w-full max-w-4xl animate-fade-in pb-10">
+            <button onclick="goHome()" class="mb-6 flex items-center text-gray-500 hover:text-indigo-600 font-bold transition group">
+                <div class="bg-white p-2 rounded-full shadow-sm mr-3 group-hover:shadow-md transition">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                처음으로 돌아가기
+            </button>
+
+            <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden relative">
+                <div class="h-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                <div class="p-8 md:p-12">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 border-b border-gray-100 pb-8">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-3 py-1 bg-gray-100 rounded-lg text-gray-600 font-bold text-sm" id="detailId">20101</span>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg font-bold text-sm">성적산출완료</span>
+                            </div>
+                            <h2 class="text-5xl font-extrabold text-gray-900" id="detailName">홍길동</h2>
+                        </div>
+                        <div class="mt-6 md:mt-0 text-left md:text-right">
+                            <div class="text-gray-500 font-semibold mb-1">최종 등급</div>
+                            <div class="text-7xl font-black gradient-text leading-none" id="detailGrade">1<span class="text-4xl text-gray-400 ml-1">등급</span></div>
+                            <p class="text-gray-500 font-medium mt-2 text-lg">전교 <span id="detailRank" class="text-gray-900 font-bold">1</span>등 / 49명</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                        <div class="bg-gray-50 rounded-2xl p-6 text-center hover:bg-indigo-50 transition border border-transparent hover:border-indigo-100">
+                            <div class="text-gray-400 text-sm font-bold mb-2 uppercase">중간고사(30%)</div>
+                            <div class="text-3xl font-bold text-gray-800" id="scoreMid">-</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-2xl p-6 text-center hover:bg-indigo-50 transition border border-transparent hover:border-indigo-100">
+                            <div class="text-gray-400 text-sm font-bold mb-2 uppercase">기말고사(30%)</div>
+                            <div class="text-3xl font-bold text-gray-800" id="scoreFinal">-</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-2xl p-6 text-center hover:bg-indigo-50 transition border border-transparent hover:border-indigo-100">
+                            <div class="text-gray-400 text-sm font-bold mb-2 uppercase">수행1(30%)</div>
+                            <div class="text-3xl font-bold text-gray-800" id="scorePerf1">-</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-2xl p-6 text-center hover:bg-indigo-50 transition border border-transparent hover:border-indigo-100">
+                            <div class="text-gray-400 text-sm font-bold mb-2 uppercase">수행2(10%)</div>
+                            <div class="text-3xl font-bold text-gray-800" id="scorePerf2">-</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900 text-white rounded-2xl p-8 flex flex-col md:flex-row justify-between items-center shadow-lg">
+                        <div class="mb-4 md:mb-0">
+                            <p class="text-gray-400 text-sm font-bold uppercase tracking-widest mb-1">Total Score</p>
+                            <p class="text-xl font-medium">최종 환산 점수 (100점 만점)</p>
+                        </div>
+                        <div class="text-5xl font-bold text-white tracking-tight" id="scoreTotal">98.50</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIST SCREEN (Hidden by default) -->
+        <div id="listScreen" class="hidden w-full max-w-5xl animate-fade-in pb-10">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="goHome()" class="flex items-center text-gray-500 hover:text-indigo-600 font-bold transition">
+                    <i class="fas fa-arrow-left mr-2"></i> 홈으로
+                </button>
+                <h2 class="text-2xl font-bold text-gray-800">전체 성적 리스트</h2>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-500">학번</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-500">이름</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-500">환산점수</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-500">석차</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-gray-500">등급</th>
+                                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-500"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="listTableBody" class="divide-y divide-gray-100">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS SCREEN (Hidden by default) -->
+        <div id="statsScreen" class="hidden w-full max-w-5xl animate-fade-in pb-10">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="goHome()" class="flex items-center text-gray-500 hover:text-indigo-600 font-bold transition">
+                    <i class="fas fa-arrow-left mr-2"></i> 홈으로
+                </button>
+                <h2 class="text-2xl font-bold text-gray-800">통계 및 분석</h2>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-indigo-500">
+                    <p class="text-gray-500 text-sm font-bold mb-1">전체 평균</p>
+                    <p class="text-3xl font-extrabold text-gray-800" id="statAvg">00.0</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-purple-500">
+                    <p class="text-gray-500 text-sm font-bold mb-1">표준 편차</p>
+                    <p class="text-3xl font-extrabold text-gray-800" id="statStdDev">0.00</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-blue-500">
+                    <p class="text-gray-500 text-sm font-bold mb-1">최고점 (1등)</p>
+                    <p class="text-3xl font-extrabold text-blue-600" id="statMax">00.0</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-l-4 border-red-400">
+                    <p class="text-gray-500 text-sm font-bold mb-1">최저점</p>
+                    <p class="text-3xl font-extrabold text-red-500" id="statMin">00.0</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Cutoff Table -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-cut text-indigo-500 mr-2"></i> 등급별 커트라인
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-center text-gray-500">등급</th>
+                                    <th class="px-4 py-2 text-center text-gray-500">인원</th>
+                                    <th class="px-4 py-2 text-center text-gray-500">누적등수</th>
+                                    <th class="px-4 py-2 text-center font-bold text-blue-600">등급 내 1등</th>
+                                    <th class="px-4 py-2 text-center font-bold text-indigo-600">커트라인 (꼴등)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cutoffTableBody" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">* 등급 내 1등: 해당 등급을 받은 학생 중 가장 높은 점수</p>
+                    <p class="text-xs text-gray-400">* 커트라인: 해당 등급을 받은 학생 중 가장 낮은 점수</p>
+                </div>
+
+                <!-- Distribution Chart -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-chart-bar text-indigo-500 mr-2"></i> 점수대별 분포 (10점 단위)
+                    </h3>
+                    <div class="h-64 flex items-end justify-between gap-2" id="distributionChart">
+                        <!-- Bars will be injected here -->
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-400 font-mono px-1">
+                        <span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100</span>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Detailed Averages Table -->
+             <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-layer-group text-indigo-500 mr-2"></i> 등급별 상세 평균 (항목별 분석)
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-bold text-gray-700">등급</th>
+                                <th class="px-4 py-3 text-center text-gray-500">중간 평균(100)</th>
+                                <th class="px-4 py-3 text-center text-gray-500">기말 평균(100)</th>
+                                <th class="px-4 py-3 text-center text-gray-500">수행1 평균(30)</th>
+                                <th class="px-4 py-3 text-center text-gray-500">수행2 평균(10)</th>
+                                <th class="px-4 py-3 text-center font-bold text-indigo-600">환산 총점 평균</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradeAvgTableBody" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
     <script>
-        // 제공된 CSV 데이터를 변수에 저장합니다.
-        const csvData = `성명,중간고사,수행평가,중간_환산,수행_환산,총점(60점만점),석차,등급
-강석민,0,0,0,0,57.74,1,1
-전재원,0,0,0,0,57.48,2,1
-장해밀,0,0,0,0,56.00,3,2
-이동민,0,0,0,0,54.81,4,2
-유현우,0,0,0,0,54.78,5,2
-권구현,0,0,0,0,54.74,6,3
-이가은,0,0,0,0,54.59,7,3
-김혁준,0,0,0,0,52.90,8,3
-박재윤,0,0,0,0,52.29,9,3
-구나예,0,0,0,0,52.19,10,3
-조성은,0,0,0,0,52.04,11,3
-박은찬,0,0,0,0,50.90,12,4
-전예영,0,0,0,0,50.62,13,4
-노건우,0,0,0,0,50.56,14,4
-이규섭,0,0,0,0,49.83,15,4
-박희연,0,0,0,0,49.00,16,4
-김나희,0,0,0,0,46.97,17,4
-이우진,0,0,0,0,44.39,18,4
-윤지유,0,0,0,0,42.65,19,4
-김성은,0,0,0,0,41.32,20,4
-황주한,0,0,0,0,40.42,21,5
-윤지현,0,0,0,0,35.17,22,5
-이현우,0,0,0,0,33.13,23,5
-맹지현,0,0,0,0,33.04,24,5
-성윤아,0,0,0,0,31.17,25,5
-최유담,0,0,0,0,29.16,26,5
-이지은,0,0,0,0,28.33,27,5
-박준혁,0,0,0,0,28.19,28,5
-최연호,0,0,0,0,27.94,29,5
-최다은,0,0,0,0,26.44,30,5
-이예은,0,0,0,0,25.48,31,6
-유소연,0,0,0,0,25.00,32,6
-우예림,0,0,0,0,22.96,33,6
-김재윤,0,0,0,0,22.13,34,6
-허경수,0,0,0,0,21.48,35,6
-박하랑,0,0,0,0,21.26,36,6
-박시원,0,0,0,0,20.59,37,6
-공재준,0,0,0,0,19.19,38,6
-박세아,0,0,0,0,18.97,39,7
-정희성,0,0,0,0,18.12,40,7
-이주성,0,0,0,0,17.59,41,7
-김채연,0,0,0,0,17.45,42,7
-정유찬,0,0,0,0,16.71,43,7
-박예은,0,0,0,0,16.48,44,7
-최인성,0,0,0,0,16.48,45,8
-정희진,0,0,0,0,15.10,46,8
-김가형,0,0,0,0,13.87,47,8
-이준민,0,0,0,0,13.75,48,8
-이연우,0,0,0,0,12.68,49,9`;
+        // Data Processing
+        const rawData = [
+            [1, 3, "김재윤", 16.3, 8.8, 17, 5], [1, 5, "박준혁", 29.2, 17.4, 19, 10],
+            [1, 11, "이우진", 45.7, 21.3, 30, 10], [1, 15, "황주한", 33.1, 21.6, 30, 10],
+            [1, 20, "박예은", 34.9, 20.6, 10, 5], [1, 23, "우예림", 25.3, 26.0, 15, 10],
+            [1, 28, "최유담", 29.1, 38.3, 20, 10], [2, 10, "이현우", 47.9, 44.9, 19, 5],
+            [2, 12, "정희성", 25.8, 8.3, 10, 5], [3, 5, "박은찬", 57.1, 66.4, 30, 10],
+            [3, 10, "이연우", 8.5, 17.5, 10, 5], [3, 17, "김채연", 20.5, 34.1, 11, 5],
+            [3, 18, "맹지현", 16.0, 8.7, 28, 5], [3, 27, "전예영", 64.5, 78.2, 26, 10],
+            [3, 28, "구나예", 70.5, 34.2, 30, 10], [4, 2, "박시원", 24.1, 26.0, 13, 5],
+            [4, 9, "이준민", 11.9, 35.4, 10, 5], [4, 12, "최인성", 20.6, 12.5, 10, 5],
+            [4, 29, "김가형", 12.3, 0.0, 10, 5], [5, 5, "박재윤", 69.3, 74.0, 29, 10],
+            [5, 27, "장해밀", 82.6, 73.2, 30, 10], [6, 22, "윤지유", 52.9, 30.0, 26, 10],
+            [6, 26, "정희진", 16.2, 17.1, 10, 5], [1, 22, "박희연", 82.6, 86.4, 23, 10],
+            [1, 24, "유소연", 12.7, 8.7, 21, 10], [2, 7, "유현우", 81.9, 64.8, 29, 10],
+            [2, 9, "이주성", 24.1, 26.0, 10, 5], [2, 13, "최연호", 41.1, 30.2, 15, 9],
+            [2, 17, "김나희", 53.9, 73.5, 30, 10], [2, 19, "김성은", 45.5, 48.0, 27, 10],
+            [2, 22, "성윤아", 32.3, 12.6, 21, 10], [2, 23, "이예은", 20.6, 17.7, 19, 10],
+            [2, 26, "조성은", 70.0, 60.2, 30, 10], [3, 1, "권구현", 91.3, 81.9, 26, 10],
+            [3, 4, "김혁준", 79.1, 69.7, 28, 10], [3, 8, "이규섭", 63.0, 79.4, 30, 10],
+            [3, 13, "전재원", 87.3, 100.0, 30, 10], [3, 20, "박세아", 28.5, 34.7, 10, 5],
+            [3, 25, "이지은", 32.8, 21.8, 18, 10], [4, 14, "허경수", 33.3, 17.7, 11, 5],
+            [5, 1, "강석민", 91.3, 100.0, 29, 10], [5, 8, "박하랑", 19.9, 33.8, 15, 10],
+            [5, 11, "이동민", 78.8, 69.5, 30, 10], [5, 24, "윤지현", 19.6, 26.3, 29, 5],
+            [5, 28, "최다은", 26.8, 34.3, 18, 10], [6, 2, "공재준", 29.2, 26.1, 10, 5],
+            [6, 6, "노건우", 65.3, 51.8, 30, 10], [6, 14, "정유찬", 8.6, 30.4, 14, 5],
+            [6, 23, "이가은", 78.1, 90.7, 30, 10]
+        ];
 
-        // CSV 데이터를 파싱하여 객체 배열로 변환하는 함수
-        function parseCSV(data) {
-            const lines = data.trim().split('\n');
-            const headers = lines[0].split(',');
-            const result = [];
-            for (let i = 1; i < lines.length; i++) {
-                const obj = {};
-                const currentline = lines[i].split(',');
-                for (let j = 0; j < headers.length; j++) {
-                    obj[headers[j]] = currentline[j];
+        let processedData = [];
+
+        function init() {
+            // Process Data logic
+            processedData = rawData.map(d => {
+                let classNum = d[0].toString();
+                let studentNum = d[1].toString().padStart(2, '0');
+                let id = `20${classNum}${studentNum}`; 
+                
+                // Swapped: d[3] is Midterm, d[4] is Final based on user request
+                let midScore = d[3];
+                let finalScore = d[4];
+                let perf1 = d[5];
+                let perf2 = d[6];
+
+                let total = (midScore * 0.3) + (finalScore * 0.3) + perf1 + perf2;
+                return {
+                    id: id,
+                    name: d[2],
+                    mid: midScore,    // Swapped
+                    final: finalScore, // Swapped
+                    perf1: perf1,
+                    perf2: perf2,
+                    total: parseFloat(total.toFixed(2)),
+                    rank: 0,
+                    grade: 0
+                };
+            });
+
+            // Rank & Grade Logic
+            processedData.sort((a, b) => b.total - a.total);
+            
+            for (let i = 0; i < processedData.length; i++) {
+                if (i > 0 && processedData[i].total === processedData[i-1].total) {
+                    processedData[i].rank = processedData[i-1].rank;
+                } else {
+                    processedData[i].rank = i + 1;
                 }
-                result.push(obj);
             }
-            return result;
+
+            const n = processedData.length;
+            const gradePercents = [4, 11, 23, 40, 60, 77, 89, 96, 100];
+            const gradeCutoffs = gradePercents.map(p => Math.round(n * p / 100));
+
+            processedData.forEach(s => {
+                for(let i=0; i<gradeCutoffs.length; i++) {
+                    if(s.rank <= gradeCutoffs[i]) {
+                        s.grade = i + 1;
+                        break;
+                    }
+                }
+                if(!s.grade) s.grade = 9;
+            });
         }
 
-        const studentData = parseCSV(csvData);
+        function goHome() {
+            document.getElementById('searchScreen').classList.remove('hidden');
+            document.getElementById('detailScreen').classList.add('hidden');
+            document.getElementById('listScreen').classList.add('hidden');
+            document.getElementById('statsScreen').classList.add('hidden');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchInput').focus();
+        }
 
-        // DOM 요소 가져오기
-        const mainScreen = document.getElementById('main-screen');
-        const resultsScreen = document.getElementById('results-screen');
-        const searchForm = document.getElementById('search-form');
-        const nameInput = document.getElementById('student-name-input');
-        const errorMessage = document.getElementById('error-message');
-        const backButton = document.getElementById('back-to-main');
-        
-        const resultName = document.getElementById('result-name');
-        const resultScore = document.getElementById('result-score');
-        const resultGrade = document.getElementById('result-grade');
-        const resultRank = document.getElementById('result-rank');
-
-        // 검색 폼 제출 이벤트 처리
-        searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const studentName = nameInput.value.trim();
-            if (!studentName) {
-                showError('이름을 입력해주세요.');
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert("검색어를 입력하세요.");
                 return;
             }
-
-            const foundStudent = studentData.find(student => student.성명 === studentName);
-
-            if (foundStudent) {
-                displayResults(foundStudent);
-                switchToResultsScreen();
-            } else {
-                showError('해당 학생을 찾을 수 없습니다.');
+            let targets = processedData.filter(s => s.id === query || s.name === query);
+            if (targets.length === 0) {
+                targets = processedData.filter(s => s.id.includes(query) || s.name.includes(query));
             }
-        });
-
-        // '처음으로' 버튼 클릭 이벤트 처리
-        backButton.addEventListener('click', () => {
-            switchToMainScreen();
-        });
-
-        // 에러 메시지 표시 함수
-        function showError(message) {
-            errorMessage.textContent = message;
-            setTimeout(() => {
-                errorMessage.textContent = '';
-            }, 3000);
+            if (targets.length === 0) {
+                alert("해당 학생을 찾을 수 없습니다.");
+                return;
+            }
+            if (targets.length === 1) {
+                showDetail(targets[0]);
+            } else {
+                showList(targets);
+            }
         }
 
-        // 결과 표시 함수
-        function displayResults(student) {
-            resultName.textContent = student.성명;
-            resultScore.textContent = `${student['총점(60점만점)']}점`;
-            resultGrade.textContent = `${student.등급}등급`;
-            resultRank.textContent = `${student.석차}등`;
+        function showFullList() {
+            const sorted = [...processedData].sort((a, b) => a.rank - b.rank);
+            showList(sorted);
         }
 
-        // 결과 화면으로 전환하는 함수
-        function switchToResultsScreen() {
-            mainScreen.classList.remove('screen-show');
-            mainScreen.classList.add('screen-hide');
+        function showDetail(s) {
+            document.getElementById('searchScreen').classList.add('hidden');
+            document.getElementById('listScreen').classList.add('hidden');
+            document.getElementById('statsScreen').classList.add('hidden');
+            const detailScreen = document.getElementById('detailScreen');
+            detailScreen.classList.remove('hidden');
+
+            document.getElementById('detailName').innerText = s.name;
+            document.getElementById('detailId').innerText = s.id;
+            document.getElementById('detailGrade').innerHTML = `${s.grade}<span class="text-4xl text-gray-400 ml-1">등급</span>`;
+            document.getElementById('detailRank').innerText = s.rank;
             
-            setTimeout(() => {
-                resultsScreen.classList.remove('screen-hide');
-                resultsScreen.classList.add('screen-show');
-
-                // 카드 애니메이션 적용
-                const cards = resultsScreen.querySelectorAll('.card-enter');
-                cards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.classList.add('card-enter-active');
-                    }, 100 * index);
-                });
-            }, 400);
+            document.getElementById('scoreMid').innerText = s.mid.toFixed(1);
+            document.getElementById('scoreFinal').innerText = s.final.toFixed(1);
+            document.getElementById('scorePerf1').innerText = s.perf1.toFixed(1);
+            document.getElementById('scorePerf2').innerText = s.perf2.toFixed(1);
+            document.getElementById('scoreTotal').innerText = s.total.toFixed(2);
         }
 
-        // 메인 화면으로 전환하는 함수
-        function switchToMainScreen() {
-            resultsScreen.classList.remove('screen-show');
-            resultsScreen.classList.add('screen-hide');
+        function showList(data) {
+            document.getElementById('searchScreen').classList.add('hidden');
+            document.getElementById('detailScreen').classList.add('hidden');
+            document.getElementById('statsScreen').classList.add('hidden');
+            document.getElementById('listScreen').classList.remove('hidden');
+
+            const tbody = document.getElementById('listTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition";
+                let badgeClass = "bg-gray-100 text-gray-600";
+                if(s.grade === 1) badgeClass = "bg-indigo-100 text-indigo-700 border border-indigo-200";
+                else if(s.grade === 2) badgeClass = "bg-purple-100 text-purple-700 border border-purple-200";
+                else if(s.grade === 3) badgeClass = "bg-pink-100 text-pink-700 border border-pink-200";
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono text-gray-500">${s.id}</td>
+                    <td class="px-6 py-4 font-bold text-gray-900 text-lg">${s.name}</td>
+                    <td class="px-6 py-4 text-center font-bold text-gray-800">${s.total.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-center text-gray-500">${s.rank}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-block px-3 py-1 rounded-full text-sm font-bold ${badgeClass}">${s.grade}등급</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="showDetailByID('${s.id}')" class="text-indigo-500 hover:text-indigo-700 font-bold text-sm">
+                            상세보기 <i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showDetailByID(id) {
+            const s = processedData.find(student => student.id === id);
+            if(s) showDetail(s);
+        }
+
+        // --- STATISTICS LOGIC ---
+        function calculateStats() {
+            // 1. General Stats
+            const scores = processedData.map(s => s.total);
+            const totalSum = scores.reduce((a, b) => a + b, 0);
+            const avg = totalSum / scores.length;
+            const max = Math.max(...scores);
+            const min = Math.min(...scores);
             
-            // 카드 애니메이션 초기화
-            const cards = resultsScreen.querySelectorAll('.card-enter');
-            cards.forEach(card => card.classList.remove('card-enter-active'));
+            // Standard Deviation
+            const squareDiffs = scores.map(value => Math.pow(value - avg, 2));
+            const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / scores.length;
+            const stdDev = Math.sqrt(avgSquareDiff);
 
-            setTimeout(() => {
-                mainScreen.classList.remove('screen-hide');
-                mainScreen.classList.add('screen-show');
-                nameInput.value = ''; // 입력 필드 초기화
-            }, 400);
+            document.getElementById('statAvg').innerText = avg.toFixed(1);
+            document.getElementById('statMax').innerText = max.toFixed(1);
+            document.getElementById('statMin').innerText = min.toFixed(1);
+            document.getElementById('statStdDev').innerText = stdDev.toFixed(2);
+
+            // 2. Cutoff & Top Score Table
+            const cutoffBody = document.getElementById('cutoffTableBody');
+            const avgBody = document.getElementById('gradeAvgTableBody');
+            cutoffBody.innerHTML = '';
+            avgBody.innerHTML = '';
+
+            for(let g=1; g<=9; g++) {
+                const studentsInGrade = processedData.filter(s => s.grade === g);
+                
+                if (studentsInGrade.length === 0) continue;
+
+                // Sort already descending
+                const topStudent = studentsInGrade[0];
+                const lastStudent = studentsInGrade[studentsInGrade.length - 1]; 
+                
+                const topScore = topStudent.total;
+                const cutoffScore = lastStudent.total;
+                
+                const minRank = topStudent.rank;
+                const maxRank = lastStudent.rank;
+                
+                let rankText = (minRank === maxRank) ? `${minRank}등` : `${minRank}~${maxRank}등`;
+
+                let row = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-center font-bold text-gray-700">${g}등급</td>
+                        <td class="px-4 py-3 text-center text-gray-600">${studentsInGrade.length}명</td>
+                        <td class="px-4 py-3 text-center text-gray-500 text-xs">${rankText}</td>
+                        <td class="px-4 py-3 text-center font-bold text-blue-600">${topScore.toFixed(2)}</td>
+                        <td class="px-4 py-3 text-center font-bold text-indigo-600">${cutoffScore.toFixed(2)}</td>
+                    </tr>
+                `;
+                cutoffBody.insertAdjacentHTML('beforeend', row);
+
+                // Averages
+                const gMid = studentsInGrade.reduce((sum, s) => sum + s.mid, 0) / studentsInGrade.length;
+                const gFinal = studentsInGrade.reduce((sum, s) => sum + s.final, 0) / studentsInGrade.length;
+                const gPerf1 = studentsInGrade.reduce((sum, s) => sum + s.perf1, 0) / studentsInGrade.length;
+                const gPerf2 = studentsInGrade.reduce((sum, s) => sum + s.perf2, 0) / studentsInGrade.length;
+                const gTotal = studentsInGrade.reduce((sum, s) => sum + s.total, 0) / studentsInGrade.length;
+
+                let avgRow = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-gray-700 border-r border-gray-100">${g}등급</td>
+                        <td class="px-4 py-3 text-center text-gray-600">${gMid.toFixed(1)}</td>
+                        <td class="px-4 py-3 text-center text-gray-600">${gFinal.toFixed(1)}</td>
+                        <td class="px-4 py-3 text-center text-gray-600">${gPerf1.toFixed(1)}</td>
+                        <td class="px-4 py-3 text-center text-gray-600">${gPerf2.toFixed(1)}</td>
+                        <td class="px-4 py-3 text-center font-bold text-indigo-600 bg-indigo-50/50">${gTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+                avgBody.insertAdjacentHTML('beforeend', avgRow);
+            }
+
+            // 4. Distribution Chart (Simple HTML/CSS)
+            const distChart = document.getElementById('distributionChart');
+            distChart.innerHTML = '';
+            
+            // Buckets: 0-10, 10-20, ... 90-100
+            let buckets = new Array(10).fill(0);
+            processedData.forEach(s => {
+                let idx = Math.floor(s.total / 10);
+                if (idx >= 10) idx = 9; // Handle 100
+                buckets[idx]++;
+            });
+            
+            const maxCount = Math.max(...buckets);
+
+            buckets.forEach((count, i) => {
+                let heightPct = (count / maxCount) * 100;
+                let colorClass = count > 0 ? "bg-indigo-500" : "bg-gray-200";
+                let bar = `
+                    <div class="flex flex-col justify-end items-center w-full h-full group relative">
+                        <div class="mb-1 text-xs font-bold text-gray-500 opacity-0 group-hover:opacity-100 transition">${count}명</div>
+                        <div class="${colorClass} w-full rounded-t-md hover:bg-purple-500 transition-all duration-300 relative" style="height: ${heightPct}%"></div>
+                        <div class="mt-1 text-[10px] text-gray-400 text-center w-full">${i*10}~</div>
+                    </div>
+                `;
+                distChart.insertAdjacentHTML('beforeend', bar);
+            });
         }
+
+        function showStats() {
+            calculateStats();
+            document.getElementById('searchScreen').classList.add('hidden');
+            document.getElementById('listScreen').classList.add('hidden');
+            document.getElementById('detailScreen').classList.add('hidden');
+            document.getElementById('statsScreen').classList.remove('hidden');
+        }
+
+        // Initialize
+        init();
+        document.getElementById('searchInput').focus();
+
     </script>
 </body>
 </html>
-
-
